@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,14 +30,39 @@ import {
 } from '@/components/ui/select';
 import { mockUsers, mockProjects } from '@/data/mockData';
 
+
 export default function AdminDashboard() {
-  const totalUsers = mockUsers.length;
+  
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const activeProjects = mockProjects.length;
-  const avgProgress = Math.round(
-    mockUsers.reduce((sum, u) => sum + u.progress, 0) / totalUsers
-  );
+ 
+
+
+  useEffect(()=>{
+    const fetchUsers=async ()=>{
+      try{
+        const res=await fetch('http://localhost:5009/api/admin/users');
+        if(!res.ok){
+          throw new Error("Failed to fetch users");
+        }
+        const data=await res.json();
+        console.log('Fetched users:',data);
+        setUsers(data);
+      }
+      catch(error){
+        console.error('Error fetching users:',error);
+      } finally{
+        setLoadingUsers(false);
+      }
+    }
+    fetchUsers();
+  },[]);
+
 
   // Invite modal state
+  const totalUsers = users.length;
+  const avgProgress = totalUsers === 0 ? 0 : 0;
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({
     name: '',
@@ -46,6 +71,7 @@ export default function AdminDashboard() {
     mentor: '',
     project: ''
   });
+
 
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
