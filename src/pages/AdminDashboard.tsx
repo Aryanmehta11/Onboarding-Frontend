@@ -28,7 +28,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { mockUsers, mockProjects } from '@/data/mockData';
+import {  mockProjects } from '@/data/mockData';
+import {getUsers,AdminUser} from '@/api/adminAPI';
 
 
 export default function AdminDashboard() {
@@ -42,16 +43,11 @@ export default function AdminDashboard() {
   useEffect(()=>{
     const fetchUsers=async ()=>{
       try{
-        const res=await fetch('http://localhost:5009/api/admin/users');
-        if(!res.ok){
-          throw new Error("Failed to fetch users");
-        }
-        const data=await res.json();
-        console.log('Fetched users:',data);
+        const data=await getUsers();
         setUsers(data);
       }
-      catch(error){
-        console.error('Error fetching users:',error);
+      catch(err:any){
+        console.error('Error fetching users:',err.message);
       } finally{
         setLoadingUsers(false);
       }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState ,useEffect} from 'react';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,11 +6,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, Search, Edit, Ban } from 'lucide-react';
 import { mockUsers } from '@/data/mockData';
+import {getUsers,AdminUser} from '@/api/adminAPI';
 
 export default function Users() {
   const [search, setSearch] = useState('');
+  const [users,setUsers]=useState<AdminUser[]>([]);
+  const [loadingUsers,setLoadingUsers]=useState(true);
 
-  const filteredUsers = mockUsers.filter(user => 
+  useEffect(()=>{
+    const fetchUsers=async ()=>{
+      try{
+        const data=await getUsers();
+        setUsers(data);
+      }
+      catch(err:any){
+        console.error('Error fetching users:',err.message);
+      } finally{
+        setLoadingUsers(false);
+      }
+    }
+    fetchUsers();
+  },[]);
+
+  const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(search.toLowerCase()) ||
     user.email.toLowerCase().includes(search.toLowerCase())
   );
